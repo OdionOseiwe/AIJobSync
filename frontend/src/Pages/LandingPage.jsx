@@ -1,6 +1,7 @@
 import React from 'react'
 import NavBar from '../components/NavBar'
 import { NavLink } from 'react-router-dom'
+import Footer from '../Components/Footer'
 
 export default function Dashboard() {
   return (
@@ -24,6 +25,7 @@ export default function Dashboard() {
         <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-X05ahxFOrovDPj17QakxksEZXHv6fArgKQ&s" alt="Image" sizes="" srcset="" className='rounded-2xl w-full h-full ' />
 
       </div>
+      <Footer/>
     </div>
   )
 }

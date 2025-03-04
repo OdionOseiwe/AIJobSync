@@ -28,12 +28,13 @@ contract JobMarketplace is ReentrancyGuard {
     
     mapping(bytes32 => Job) public jobs; // Unique job ID → Job details
     mapping(address => FreelancerProfile) public freelancerProfiles;
-    mapping(bytes32 => address[]) public jobRegistrations;
     mapping(bytes32 => address[]) public jobRecommendations;
+    mapping(bytes32 => address[]) public jobApplications; 
 
     event JobCreated(bytes32 indexed jobId, string title, address employer, uint256 budget);
     event JobAssigned(bytes32 indexed jobId, address freelancer);
     event JobCompleted(bytes32 indexed jobId, address freelancer, uint256 payout);
+    event JobApplied(bytes32 indexed jobId, address freelancer);
 
     constructor(address _MockUSDT, address _escrow) {
         MockUSDT = IERC20(_MockUSDT);
@@ -51,11 +52,13 @@ contract JobMarketplace is ReentrancyGuard {
         });
     }
 
-    function generateJobId(string memory _title, address _employer) public pure  returns (bytes32) {
-        return keccak256(abi.encodePacked(_title, _employer));
+    function generateJobId(string memory _title, address _employer) public view returns (bytes32) {
+        return keccak256(abi.encodePacked(_title, _employer, block.timestamp));
     }
+    
 
-    function createJob(string memory _title, string memory _description, uint256 _budget) external  nonReentrant {
+    function createJob(string memory _title, string memory _description, uint256 _budget) 
+        external nonReentrant returns (bytes32){
         bytes32 jobId = generateJobId(_title, msg.sender);
         require(jobs[jobId].budget == 0, "Job already exists");
 
@@ -68,50 +71,77 @@ contract JobMarketplace is ReentrancyGuard {
             completed: false
         });
 
-        // Call escrow to handle funds
-        try escrowContract.depositFunds(jobId, msg.sender, _budget){
+        try escrowContract.depositFunds(jobId, msg.sender, _budget) {
             emit JobCreated(jobId, _title, msg.sender, _budget);
-        }catch{
+            return jobId; // ✅ Return Job ID to the caller
+        } catch {
             delete jobs[jobId];
             revert("Failed to depositFunds");
         }
     }
 
-    //store AI recommendedFreelancers
-
-    function recommendFreelancers(bytes32 jobId, address[] memory recommendedFreelancers) external  {
+    function applyForJob(bytes32 jobId) external {
         Job storage job = jobs[jobId];
-        require(msg.sender == job.employer, "Only employer can recommend job");
-        require(jobRecommendations[jobId].length == 0, "Recommendations already set");
-        require(jobs[jobId].freelancer == address(0), "Job already assigned");
+        require(job.budget > 0, "Job does not exist");
+        require(job.freelancer == address(0), "Job already assigned");
+        require(freelancerProfiles[msg.sender].exists, "Freelancer must be registered");
     
-        // Store AI recommendations
-        jobRecommendations[jobId] = recommendedFreelancers;
-    
+        jobApplications[jobId].push(msg.sender);
+        emit JobApplied(jobId, msg.sender);
     }
+    
+    function storeAIRecommendations(bytes32 jobId, address[] memory recommendedFreelancers) external  {
+        Job storage job = jobs[jobId];
 
-    function autoAssignJob(bytes32 jobId, address freelancer) external  nonReentrant {
+        require(jobs[jobId].budget > 0, "Job does not exist");
+        require(msg.sender == job.employer, "Only employer can complete job");
+        delete jobRecommendations[jobId]; // Clear old recommendations
+    
+        for (uint256 i = 0; i < recommendedFreelancers.length; i++) {
+            jobRecommendations[jobId].push(recommendedFreelancers[i]);
+        }
+    }
+    
+    
+
+    function autoAssignJob(bytes32 jobId, address freelancer) external nonReentrant {
         Job storage job = jobs[jobId];
         require(job.employer != address(0), "Job does not exist");
         require(job.freelancer == address(0), "Job already assigned");
         require(freelancerProfiles[freelancer].exists, "Freelancer must be registered");
     
-        bool isRecommended = false;
+        bool isValidFreelancer = false;
+        
+        // Check AI recommendations
         for (uint256 i = 0; i < jobRecommendations[jobId].length; i++) {
             if (jobRecommendations[jobId][i] == freelancer) {
-                isRecommended = true;
+                isValidFreelancer = true;
                 break;
             }
         }
-        require(isRecommended, "Freelancer not recommended by AI");
+    
+        // Check job applications
+        if (!isValidFreelancer) {
+            for (uint256 i = 0; i < jobApplications[jobId].length; i++) {
+                if (jobApplications[jobId][i] == freelancer) {
+                    isValidFreelancer = true;
+                    break;
+                }
+            }
+        }
+    
+        require(isValidFreelancer, "No AI recommendation or job application for this freelancer");
     
         job.freelancer = freelancer;
+    
         try escrowContract.assignFreelancer(jobId, freelancer) {
             emit JobAssigned(jobId, freelancer);
         } catch {
             revert("Failed to assign freelancer in escrow");
         }
     }
+    
+    
     
     function completeJob(bytes32 jobId) external  nonReentrant {
         Job storage job = jobs[jobId];
@@ -134,7 +164,7 @@ contract JobMarketplace is ReentrancyGuard {
         require(msg.sender == job.employer, "Only employer can cancel job");
         require(job.freelancer == address(0), "Cannot cancel after freelancer assigned");
 
-        delete jobs[jobId]; // Remove job
+        delete jobs[jobId];
 
         escrowContract.refundEmployer(jobId);
     }
