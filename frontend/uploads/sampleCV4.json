@@ -1,0 +1,25 @@
+{
+    "name": "Michael Brown",
+    "skills": ["Go", "Rust", "Blockchain", "Smart Contracts", "Distributed Systems"],
+    "experienceYears": 7,
+    "hourlyRate": 90,
+    "rating": 4.7,
+    "completedJobs": 28,
+    "bio": "Senior blockchain engineer with a focus on Rust-based smart contracts and distributed systems.",
+    "portfolio": [
+      {
+        "title": "Cross-Chain Bridge",
+        "description": "Developed a cross-chain bridge connecting Ethereum and Polkadot.",
+        "link": "https://github.com/michaelbrown/cross-chain-bridge"
+      },
+      {
+        "title": "Zero-Knowledge Identity Protocol",
+        "description": "Implemented a zk-SNARK-based identity verification system.",
+        "link": "https://github.com/michaelbrown/zk-id"
+      }
+    ],
+    "certifications": ["Certified Blockchain Expert", "Rust Programming Certification"],
+    "languages": ["English", "German"],
+    "availability": "40 hours per week",
+    "timezone": "UTC+3"
+  }

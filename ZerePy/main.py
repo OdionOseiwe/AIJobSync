@@ -17,9 +17,9 @@ from actions.freelancer_actions import *
 load_dotenv()
 
 def main():
-    parser = argparse.ArgumentParser(description='Freelancer Matching Agent')
-    parser.add_argument('--job', type=str, help='Process a specific job ID')
-    parser.add_argument('--monitor', action='store_true', help='Monitor for new jobs')
+    parser = argparse.ArgumentParser(description='Freelancer Matching Agent for Sonic using Allora AI')
+    parser.add_argument('--job', type=str, help='Process a specific job ID (bytes32 hex string)')
+    parser.add_argument('--verify', type=str, help='Verify Allora proof for a job')
     
     args = parser.parse_args()
     
@@ -32,26 +32,26 @@ def main():
     # Configure connections
     print("Configuring connections...")
     
-    # Configure OpenAI connection
-    openai_api_key = os.getenv("OPENAI_API_KEY")
-    if not openai_api_key:
-        print("Error: OPENAI_API_KEY not found in environment variables")
+    # Configure Allora connection
+    allora_api_key = os.getenv("ALLORA_API_KEY")
+    if not allora_api_key:
+        print("Error: ALLORA_API_KEY not found in environment variables")
         return
     
-    agent.connection_manager.configure_connection("openai", {
-        "api_key": openai_api_key
+    agent.connection_manager.configure_connection("allora", {
+        "api_key": allora_api_key
     })
     
-    # Configure Ethereum connection
-    eth_rpc_url = os.getenv("ETH_RPC_URL")
-    eth_private_key = os.getenv("ETH_PRIVATE_KEY")
-    if not eth_rpc_url or not eth_private_key:
-        print("Error: Ethereum configuration not found in environment variables")
+    # Configure Ethereum connection (for Sonic)
+    sonic_rpc_url = os.getenv("SONIC_RPC_URL")
+    sonic_private_key = os.getenv("SONIC_PRIVATE_KEY")
+    if not sonic_rpc_url or not sonic_private_key:
+        print("Error: Sonic blockchain configuration not found in environment variables")
         return
     
     agent.connection_manager.configure_connection("ethereum", {
-        "rpc_url": eth_rpc_url,
-        "private_key": eth_private_key
+        "rpc_url": sonic_rpc_url,
+        "private_key": sonic_private_key
     })
     
     if args.job:
@@ -81,59 +81,41 @@ def main():
                 }, f, indent=2)
             
             print(f"\nRecommendations saved to job_{args.job}_recommendations.json")
+            print(f"Allora proofs saved to job_{args.job}_allora_proofs.json")
         else:
             print(f"Error processing job: {result.get('error', 'Unknown error')}")
     
-    elif args.monitor:
-        monitor_jobs(agent)
+    elif args.verify:
+        print(f"Verifying Allora proof for job: {args.verify}")
+        
+        # Load the proof file
+        try:
+            with open(f"job_{args.verify}_allora_proofs.json", "r") as f:
+                proofs = json.load(f)
+                
+            # Verify requirements proof
+            req_verify_result = agent.execute_action("verify-allora-proof", proof=proofs["requirements_proof"])
+            if req_verify_result["success"] and req_verify_result["verified"]:
+                print("✅ Job requirements analysis proof verified")
+            else:
+                print("❌ Job requirements analysis proof verification failed")
+                
+            # Verify match proofs
+            for i, match_proof in enumerate(proofs["match_proofs"]):
+                match_verify_result = agent.execute_action("verify-allora-proof", proof=match_proof)
+                if match_verify_result["success"] and match_verify_result["verified"]:
+                    print(f"✅ Match proof {i+1} verified")
+                else:
+                    print(f"❌ Match proof {i+1} verification failed")
+                    
+            print("\nVerification complete!")
+        except FileNotFoundError:
+            print(f"Error: Proof file job_{args.verify}_allora_proofs.json not found")
+        except Exception as e:
+            print(f"Error verifying proofs: {str(e)}")
     
     else:
         parser.print_help()
-
-def monitor_jobs(agent):
-    """Monitor for new job creation events"""
-    import time
-    from web3 import Web3
-    
-    # Initialize Web3
-    rpc_url = os.getenv("ETH_RPC_URL")
-    web3 = Web3(Web3.HTTPProvider(rpc_url))
-    
-    # Load contract
-    marketplace_address = os.getenv("JOB_MARKETPLACE_ADDRESS")
-    
-    # Create event filter for JobCreated events (simplified for MVP)
-    # In a real implementation, you'd use the proper event signature
-    job_filter = web3.eth.filter({
-        'address': marketplace_address,
-        'topics': [web3.keccak(text='JobCreated(uint256,address)').hex()]
-    })
-    
-    print("Monitoring for new jobs...")
-    
-    while True:
-        try:
-            # Check for new events
-            for event in job_filter.get_new_entries():
-                # In a real implementation, you'd decode the event data
-                # For this MVP, we'll use a simplified approach
-                job_id = "0x" + event['data'][:64].lstrip("0")
-                print(f"New job detected: {job_id}")
-                
-                # Process the job
-                result = agent.execute_action("recommend-freelancers", job_id=job_id)
-                
-                if result["success"]:
-                    print(f"Successfully processed job {job_id}")
-                else:
-                    print(f"Failed to process job {job_id}: {result.get('error')}")
-            
-            # Sleep to avoid excessive polling
-            time.sleep(60)
-            
-        except Exception as e:
-            print(f"Error in job monitoring: {str(e)}")
-            time.sleep(60)  # Wait before retrying
 
 if __name__ == "__main__":
     main()

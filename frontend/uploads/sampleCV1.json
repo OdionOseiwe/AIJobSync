@@ -1,0 +1,26 @@
+{
+    "name": "John Doe",
+    "skills": ["JavaScript", "Solidity", "React", "Web3.js", "Smart Contracts"],
+    "experienceYears": 5,
+    "hourlyRate": 75,
+    "rating": 4.8,
+    "completedJobs": 23,
+    "bio": "Blockchain developer with 5 years of experience in DeFi and NFT projects. Specialized in Solidity smart contract development and React frontends.",
+    "portfolio": [
+      {
+        "title": "DeFi Dashboard",
+        "description": "Built a dashboard for tracking DeFi investments across multiple protocols",
+        "link": "https://github.com/johndoe/defi-dashboard"
+      },
+      {
+        "title": "NFT Marketplace",
+        "description": "Developed smart contracts for an NFT marketplace with royalty support",
+        "link": "https://github.com/johndoe/nft-marketplace"
+      }
+    ],
+    "certifications": ["Ethereum Developer Certification", "Web3 Security Certification"],
+    "languages": ["English", "Spanish"],
+    "availability": "20 hours per week",
+    "timezone": "UTC-5"
+  }
+  

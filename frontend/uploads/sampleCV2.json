@@ -1,0 +1,25 @@
+{
+    "name": "Sophia Lee",
+    "skills": ["React", "TypeScript", "Node.js", "GraphQL", "UI/UX Design"],
+    "experienceYears": 4,
+    "hourlyRate": 65,
+    "rating": 4.6,
+    "completedJobs": 18,
+    "bio": "Full-stack developer with a passion for building modern web applications using React and GraphQL.",
+    "portfolio": [
+      {
+        "title": "E-commerce Platform",
+        "description": "Designed and developed a high-performance e-commerce platform.",
+        "link": "https://github.com/sophialee/ecommerce-platform"
+      },
+      {
+        "title": "SaaS Dashboard",
+        "description": "Built a SaaS dashboard for managing subscriptions and analytics.",
+        "link": "https://github.com/sophialee/saas-dashboard"
+      }
+    ],
+    "certifications": ["React Developer Certification", "Full-Stack JavaScript Certification"],
+    "languages": ["English", "Korean"],
+    "availability": "25 hours per week",
+    "timezone": "UTC-7"
+  }

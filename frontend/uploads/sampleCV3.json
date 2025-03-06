@@ -1,0 +1,25 @@
+{
+    "name": "Alice Smith",
+    "skills": ["Python", "TensorFlow", "Machine Learning", "AI", "Data Science"],
+    "experienceYears": 6,
+    "hourlyRate": 85,
+    "rating": 4.9,
+    "completedJobs": 30,
+    "bio": "AI and machine learning engineer with 6 years of experience in developing predictive models and deep learning applications.",
+    "portfolio": [
+      {
+        "title": "AI-Powered Resume Scanner",
+        "description": "Developed a deep learning-based resume scanner for HR tech companies.",
+        "link": "https://github.com/alicesmith/resume-scanner"
+      },
+      {
+        "title": "Stock Market Predictor",
+        "description": "Built a stock market prediction model using LSTMs and historical data.",
+        "link": "https://github.com/alicesmith/stock-predictor"
+      }
+    ],
+    "certifications": ["TensorFlow Developer Certification", "AWS Machine Learning Specialty"],
+    "languages": ["English", "French"],
+    "availability": "30 hours per week",
+    "timezone": "UTC+1"
+  }

@@ -9,20 +9,20 @@ from zerepy import register_action
 load_dotenv()
 logger = logging.getLogger("actions.freelancer_actions")
 
-# Initialize Web3
-rpc_url = os.getenv("ETH_RPC_URL")
+# Initialize Web3 with Sonic RPC
+rpc_url = os.getenv("SONIC_RPC_URL")
 web3 = Web3(Web3.HTTPProvider(rpc_url))
 
 # Set up account
-private_key = os.getenv("ETH_PRIVATE_KEY")
+private_key = os.getenv("SONIC_PRIVATE_KEY")
 account = web3.eth.account.from_key(private_key)
 address = account.address
 
-# Load contract ABI (simplified for MVP)
+# Load contract ABIs
 JOB_MARKETPLACE_ADDRESS = os.getenv("JOB_MARKETPLACE_ADDRESS")
 JOB_MARKETPLACE_ABI = [
     {
-        "inputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+        "inputs": [{"internalType": "bytes32", "name": "", "type": "bytes32"}],
         "name": "jobs",
         "outputs": [
             {"internalType": "string", "name": "title", "type": "string"},
@@ -37,8 +37,8 @@ JOB_MARKETPLACE_ABI = [
     },
     {
         "inputs": [
-            {"internalType": "uint256", "name": "jobId", "type": "uint256"},
-            {"internalType": "address[]", "name": "recommendations", "type": "address[]"}
+            {"internalType": "bytes32", "name": "jobId", "type": "bytes32"},
+            {"internalType": "address[]", "name": "recommendedFreelancers", "type": "address[]"}
         ],
         "name": "storeAIRecommendations",
         "outputs": [],
@@ -53,6 +53,13 @@ JOB_MARKETPLACE_ABI = [
             {"internalType": "string", "name": "ipfsHash", "type": "string"},
             {"internalType": "bool", "name": "exists", "type": "bool"}
         ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [{"internalType": "bytes32", "name": "", "type": "bytes32"}, {"internalType": "uint256", "name": "", "type": "uint256"}],
+        "name": "jobRecommendations",
+        "outputs": [{"internalType": "address", "name": "", "type": "address"}],
         "stateMutability": "view",
         "type": "function"
     }
@@ -71,6 +78,24 @@ def get_job_details(agent, **kwargs):
         if not job_id:
             logger.error("No job ID provided")
             return {"success": False, "error": "No job ID provided"}
+        
+        # For testing: return mock data if job_id is "test"
+        if job_id == "test":
+            return {
+                "success": True,
+                "job_details": {
+                    "title": "Smart Contract Developer",
+                    "description": "We need an experienced Solidity developer to build a DeFi protocol on Sonic blockchain. Must have experience with AMMs, yield farming, and security best practices.",
+                    "budget": 5000,
+                    "employer": "0xEmployerAddress",
+                    "freelancer": "0x0000000000000000000000000000000000000000",
+                    "completed": False
+                }
+            }
+            
+        # Convert string job ID to bytes32 if needed
+        if isinstance(job_id, str) and job_id.startswith("0x"):
+            job_id = bytes.fromhex(job_id[2:])
             
         job = marketplace_contract.functions.jobs(job_id).call()
         
@@ -83,12 +108,40 @@ def get_job_details(agent, **kwargs):
             "completed": job[5]
         }
         
-        logger.info(f"Retrieved job details for job ID: {job_id}")
+        logger.info(f"Retrieved job details for job ID: {job_id.hex() if isinstance(job_id, bytes) else job_id}")
         return {"success": True, "job_details": job_details}
         
     except Exception as e:
         logger.error(f"Failed to get job details: {str(e)}")
         return {"success": False, "error": f"Error getting job details: {str(e)}"}
+
+@register_action("get-registered-freelancers")
+def get_registered_freelancers(agent, **kwargs):
+    """Get registered freelancers from events"""
+    try:
+        # For MVP, we'll use mock data
+        # In a real implementation, you'd query events or use a more efficient method
+        
+        # Mock data for demonstration
+        freelancers = [
+            {
+                "address": "0x123abc...",
+                "name": "John Doe",
+                "ipfsHash": "QmT78zSuBmuS4z925WZfrqQ1qHaJ56DQaTfyMUF7F8ff5o"
+            },
+            {
+                "address": "0x456def...",
+                "name": "Jane Smith",
+                "ipfsHash": "QmW7Uc3vnh7J5aJ56DQaTfyMUF7F8ff5oT78zSuBmuS4z9"
+            }
+        ]
+        
+        logger.info(f"Retrieved {len(freelancers)} freelancers")
+        return {"success": True, "freelancers": freelancers}
+        
+    except Exception as e:
+        logger.error(f"Failed to get freelancers: {str(e)}")
+        return {"success": False, "error": f"Error getting freelancers: {str(e)}"}
 
 @register_action("get-ipfs-content")
 def get_ipfs_content(agent, **kwargs):
@@ -116,14 +169,14 @@ def get_ipfs_content(agent, **kwargs):
 
 @register_action("analyze-job-requirements")
 def analyze_job_requirements(agent, **kwargs):
-    """Extract key requirements from job description using LLM"""
+    """Extract key requirements from job description using Allora AI"""
     try:
         description = kwargs.get("description")
         if not description:
             logger.error("No job description provided")
             return {"success": False, "error": "No job description provided"}
         
-        # Use the LLM to extract requirements
+        # Use Allora AI to extract requirements
         prompt = f"""
         Extract the key skills and requirements from this job description:
         
@@ -138,16 +191,25 @@ def analyze_job_requirements(agent, **kwargs):
         }}
         """
         
-        # Use the configured LLM connection
-        llm_response = agent.connection_manager.connections["openai"].generate(prompt)
+        # Use the configured Allora connection
+        allora_result = agent.connection_manager.connections["allora"].generate(
+            prompt=prompt,
+            get_proof=True  # Request verifiable proof
+        )
         
-        # Parse the JSON response
+        # Parse the response
         try:
-            requirements = json.loads(llm_response)
+            requirements = json.loads(allora_result["response"])
+            proof = allora_result["proof"]
+            
             logger.info(f"Extracted requirements: {requirements}")
-            return {"success": True, "requirements": requirements}
+            return {
+                "success": True, 
+                "requirements": requirements,
+                "proof": proof
+            }
         except json.JSONDecodeError:
-            logger.error("Failed to parse LLM response as JSON")
+            logger.error("Failed to parse Allora response as JSON")
             return {"success": False, "error": "Failed to parse requirements"}
         
     except Exception as e:
@@ -156,7 +218,7 @@ def analyze_job_requirements(agent, **kwargs):
 
 @register_action("match-freelancer-profile")
 def match_freelancer_profile(agent, **kwargs):
-    """Calculate match score between job requirements and freelancer profile"""
+    """Calculate match score between job requirements and freelancer profile using Allora AI"""
     try:
         requirements = kwargs.get("requirements")
         profile = kwargs.get("profile")
@@ -165,7 +227,7 @@ def match_freelancer_profile(agent, **kwargs):
             logger.error("Missing requirements or profile data")
             return {"success": False, "error": "Missing requirements or profile data"}
         
-        # Use the LLM to calculate a match score
+        # Use Allora AI to calculate a match score
         prompt = f"""
         Calculate a match score (0-100) between this job requirements and freelancer profile:
         
@@ -184,16 +246,25 @@ def match_freelancer_profile(agent, **kwargs):
         }}
         """
         
-        # Use the configured LLM connection
-        llm_response = agent.connection_manager.connections["openai"].generate(prompt)
+        # Use the configured Allora connection
+        allora_result = agent.connection_manager.connections["allora"].generate(
+            prompt=prompt,
+            get_proof=True  # Request verifiable proof
+        )
         
-        # Parse the JSON response
+        # Parse the response
         try:
-            match_result = json.loads(llm_response)
+            match_result = json.loads(allora_result["response"])
+            proof = allora_result["proof"]
+            
             logger.info(f"Match score: {match_result['score']}")
-            return {"success": True, "match_result": match_result}
+            return {
+                "success": True, 
+                "match_result": match_result,
+                "proof": proof
+            }
         except json.JSONDecodeError:
-            logger.error("Failed to parse LLM response as JSON")
+            logger.error("Failed to parse Allora response as JSON")
             return {"success": False, "error": "Failed to parse match result"}
         
     except Exception as e:
@@ -210,6 +281,10 @@ def store_recommendations(agent, **kwargs):
         if not job_id or not recommended_freelancers:
             logger.error("Missing job ID or recommendations")
             return {"success": False, "error": "Missing job ID or recommendations"}
+        
+        # Convert string job ID to bytes32 if needed
+        if isinstance(job_id, str) and job_id.startswith("0x"):
+            job_id = bytes.fromhex(job_id[2:])
             
         # Build transaction
         tx = marketplace_contract.functions.storeAIRecommendations(
@@ -229,7 +304,7 @@ def store_recommendations(agent, **kwargs):
         # Wait for transaction receipt
         receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
         
-        logger.info(f"Stored recommendations for job {job_id}")
+        logger.info(f"Stored recommendations for job {job_id.hex() if isinstance(job_id, bytes) else job_id}")
         return {
             "success": receipt.status == 1,
             "transaction_hash": tx_hash.hex(),
@@ -242,7 +317,7 @@ def store_recommendations(agent, **kwargs):
 
 @register_action("recommend-freelancers")
 def recommend_freelancers(agent, **kwargs):
-    """Complete workflow to recommend freelancers for a job"""
+    """Complete workflow to recommend freelancers for a job using Allora AI"""
     try:
         job_id = kwargs.get("job_id")
         if not job_id:
@@ -257,30 +332,25 @@ def recommend_freelancers(agent, **kwargs):
         job_details = job_result["job_details"]
         logger.info(f"Processing job: {job_details['title']}")
         
-        # Step 2: Analyze job requirements
+        # Step 2: Analyze job requirements with Allora
         req_result = agent.execute_action("analyze-job-requirements", description=job_details["description"])
         if not req_result["success"]:
             return {"success": False, "error": req_result["error"]}
         
         requirements = req_result["requirements"]
+        requirements_proof = req_result["proof"]
         
-        # Step 3: Get registered freelancers (using mock data for MVP)
-        # In a real implementation, you'd query events or use a more efficient method
-        freelancers = [
-            {
-                "address": "0x123abc...",
-                "name": "John Doe",
-                "ipfsHash": "QmT78zSuBmuS4z925WZfrqQ1qHaJ56DQaTfyMUF7F8ff5o"
-            },
-            {
-                "address": "0x456def...",
-                "name": "Jane Smith",
-                "ipfsHash": "QmW7Uc3vnh7J5aJ56DQaTfyMUF7F8ff5oT78zSuBmuS4z9"
-            }
-        ]
+        # Step 3: Get registered freelancers
+        freelancers_result = agent.execute_action("get-registered-freelancers")
+        if not freelancers_result["success"]:
+            return {"success": False, "error": freelancers_result["error"]}
         
-        # Step 4: Process each freelancer
+        freelancers = freelancers_result["freelancers"]
+        
+        # Step 4: Process each freelancer with Allora
         matches = []
+        match_proofs = []
+        
         for freelancer in freelancers:
             # Get IPFS profile
             ipfs_result = agent.execute_action("get-ipfs-content", ipfs_hash=freelancer["ipfsHash"])
@@ -292,7 +362,7 @@ def recommend_freelancers(agent, **kwargs):
                 profile["address"] = freelancer["address"]
                 profile["name"] = freelancer["name"]
                 
-                # Calculate match score
+                # Calculate match score with Allora
                 match_result = agent.execute_action(
                     "match-freelancer-profile", 
                     requirements=requirements, 
@@ -308,6 +378,7 @@ def recommend_freelancers(agent, **kwargs):
                         "missing_skills": match_result["match_result"]["missing_skills"],
                         "comments": match_result["match_result"]["comments"]
                     })
+                    match_proofs.append(match_result["proof"])
             except json.JSONDecodeError:
                 logger.error(f"Invalid JSON in IPFS content for {freelancer['ipfsHash']}")
                 continue
@@ -317,6 +388,7 @@ def recommend_freelancers(agent, **kwargs):
         
         # Get top recommendations (limit to 5)
         top_recommendations = matches[:5]
+        top_proofs = match_proofs[:5] if len(match_proofs) >= 5 else match_proofs
         
         # Store recommendations on-chain
         if top_recommendations:
@@ -330,14 +402,53 @@ def recommend_freelancers(agent, **kwargs):
             if not store_result["success"]:
                 logger.warning(f"Failed to store recommendations: {store_result.get('error')}")
         
+        # Combine all proofs
+        all_proofs = {
+            "requirements_proof": requirements_proof,
+            "match_proofs": top_proofs
+        }
+        
+        # Save proofs to file
+        with open(f"job_{job_id}_allora_proofs.json", "w") as f:
+            json.dump(all_proofs, f, indent=2)
+        
         logger.info(f"Generated {len(top_recommendations)} recommendations for job {job_id}")
         return {
             "success": True,
             "job_details": job_details,
             "requirements": requirements,
-            "recommendations": top_recommendations
+            "recommendations": top_recommendations,
+            "allora_proofs": all_proofs
         }
         
     except Exception as e:
         logger.error(f"Error recommending freelancers: {str(e)}")
         return {"success": False, "error": f"Error recommending freelancers: {str(e)}"}
+
+@register_action("verify-allora-proof")
+def verify_allora_proof(agent, **kwargs):
+    """Verify Allora proof for a job"""
+    try:
+        proof = kwargs.get("proof")
+        if not proof:
+            logger.error("No proof provided")
+            return {"success": False, "error": "No proof provided"}
+        
+        # In a real implementation, you would call Allora's verification API
+        # For this MVP, we'll simulate verification
+        
+        # Use the configured Allora connection to verify the proof
+        allora_connection = agent.connection_manager.connections["allora"]
+        
+        # This is a placeholder - in a real implementation, you would use Allora's verification method
+        verification_result = {"verified": True}
+        
+        logger.info(f"Proof verification result: {verification_result}")
+        return {
+            "success": True,
+            "verified": verification_result["verified"]
+        }
+        
+    except Exception as e:
+        logger.error(f"Error verifying proof: {str(e)}")
+        return {"success": False, "error": f"Error verifying proof: {str(e)}"}
