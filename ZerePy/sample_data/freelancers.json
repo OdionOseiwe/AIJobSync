@@ -1,0 +1,53 @@
+[
+    {
+      "id": "f1",
+      "name": "Alice Johnson",
+      "skills": ["React", "Node.js", "MongoDB", "TypeScript", "AWS"],
+      "hourly_rate": 65,
+      "experience_years": 5,
+      "availability": "20 hours/week",
+      "portfolio_url": "https://alice-portfolio.dev",
+      "contact_email": "alice@example.com"
+    },
+    {
+      "id": "f2",
+      "name": "Bob Smith",
+      "skills": ["React", "Vue.js", "PostgreSQL", "Python", "Docker"],
+      "hourly_rate": 75,
+      "experience_years": 7,
+      "availability": "Full-time",
+      "portfolio_url": "https://bobsmith.dev",
+      "contact_email": "bob@example.com"
+    },
+    {
+      "id": "f3",
+      "name": "Carol Davis",
+      "skills": ["Angular", "Node.js", "MySQL", "Java", "Kubernetes"],
+      "hourly_rate": 80,
+      "experience_years": 8,
+      "availability": "Part-time",
+      "portfolio_url": "https://carol-davis.tech",
+      "contact_email": "carol@example.com"
+    },
+    {
+      "id": "f4",
+      "name": "David Wilson",
+      "skills": ["React", "Express", "PostgreSQL", "TypeScript", "Docker", "AWS"],
+      "hourly_rate": 70,
+      "experience_years": 6,
+      "availability": "Full-time",
+      "portfolio_url": "https://davidwilson.io",
+      "contact_email": "david@example.com"
+    },
+    {
+      "id": "f5",
+      "name": "Eva Martinez",
+      "skills": ["Vue.js", "Django", "PostgreSQL", "Python", "CI/CD"],
+      "hourly_rate": 60,
+      "experience_years": 4,
+      "availability": "Contract",
+      "portfolio_url": "https://evamartinez.dev",
+      "contact_email": "eva@example.com"
+    }
+  ]
+  

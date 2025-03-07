@@ -1,62 +1,57 @@
 import argparse
 import json
-import logging
 import os
+import logging
 from dotenv import load_dotenv
-from zerepy import Agent
+from freelancer_agent import FreelancerAgent
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
-
-# Import custom actions
-from actions.freelancer_actions import *
+logger = logging.getLogger("main")
 
 load_dotenv()
 
 def main():
-    parser = argparse.ArgumentParser(description='Freelancer Matching Agent for Sonic using Allora AI')
-    parser.add_argument('--job', type=str, help='Process a specific job ID (bytes32 hex string)')
-    parser.add_argument('--verify', type=str, help='Verify Allora proof for a job')
+    parser = argparse.ArgumentParser(description='Freelancer Matching Agent for Sonic Hackathon')
+    parser.add_argument('--job', type=str, help='Job ID from the JobMarketplace contract')
+    parser.add_argument('--test', action='store_true', help='Run in test mode with sample data')
+    parser.add_argument('--all', action='store_true', help='Process all active jobs')
     
     args = parser.parse_args()
     
-    # Initialize Zerepy agent
-    agent = Agent()
+    # Initialize agent
+    agent = FreelancerAgent(
+        sonic_rpc_url=os.getenv("SONIC_RPC_URL", ""),
+        sonic_private_key=os.getenv("SONIC_PRIVATE_KEY", ""),
+        job_marketplace_address=os.getenv("JOB_MARKETPLACE_ADDRESS", ""),
+        ipfs_gateway=os.getenv("IPFS_GATEWAY", "https://ipfs.io/ipfs"),
+        allora_api_key=os.getenv("ALLORA_API_KEY", "")
+    )
     
-    # Load the freelancer agent
-    agent.load_agent("freelancer_agent")
-    
-    # Configure connections
-    print("Configuring connections...")
-    
-    # Configure Allora connection
-    allora_api_key = os.getenv("ALLORA_API_KEY")
-    if not allora_api_key:
-        print("Error: ALLORA_API_KEY not found in environment variables")
-        return
-    
-    agent.connection_manager.configure_connection("allora", {
-        "api_key": allora_api_key
-    })
-    
-    # Configure Ethereum connection (for Sonic)
-    sonic_rpc_url = os.getenv("SONIC_RPC_URL")
-    sonic_private_key = os.getenv("SONIC_PRIVATE_KEY")
-    if not sonic_rpc_url or not sonic_private_key:
-        print("Error: Sonic blockchain configuration not found in environment variables")
-        return
-    
-    agent.connection_manager.configure_connection("ethereum", {
-        "rpc_url": sonic_rpc_url,
-        "private_key": sonic_private_key
-    })
-    
-    if args.job:
-        print(f"Processing job ID: {args.job}")
-        result = agent.execute_action("recommend-freelancers", job_id=args.job)
+    if args.all:
+        # Process all active jobs
+        logger.info("Processing all active jobs...")
+        result = agent.process_all_active_jobs()
+        
+        if result["success"]:
+            logger.info(f"Successfully processed {result['processed_jobs']} jobs")
+        else:
+            logger.error(f"Error processing jobs: {result.get('error')}")
+        
+    else:
+        # Get job ID
+        job_id = "test" if args.test else args.job
+        
+        if not job_id:
+            logger.error("No job ID provided. Use --job <job_id> or --test")
+            return
+        
+        # Process job and get recommendations
+        logger.info(f"Processing job ID: {job_id}")
+        result = agent.recommend_freelancers(job_id)
         
         if result["success"]:
             print("\nJob processed successfully!")
@@ -65,57 +60,15 @@ def main():
             
             print("\nTop Recommendations:")
             for i, rec in enumerate(result["recommendations"]):
-                print(f"{i+1}. {rec['name']} (Score: {rec['score']})")
-                print(f"   Address: {rec['address']}")
+                print(f"{i+1}. {rec['name']} (Match Score: {rec['score']}%)")
                 print(f"   Matching Skills: {', '.join(rec['matching_skills'])}")
                 print(f"   Missing Skills: {', '.join(rec['missing_skills'])}")
                 print(f"   Comments: {rec['comments']}")
-                print("")
+                print()
             
-            # Save results to file
-            with open(f"job_{args.job}_recommendations.json", "w") as f:
-                json.dump({
-                    "job_details": result["job_details"],
-                    "requirements": result["requirements"],
-                    "recommendations": result["recommendations"]
-                }, f, indent=2)
-            
-            print(f"\nRecommendations saved to job_{args.job}_recommendations.json")
-            print(f"Allora proofs saved to job_{args.job}_allora_proofs.json")
+            print(f"Recommendations saved to job_{job_id}_recommendations.json")
         else:
             print(f"Error processing job: {result.get('error', 'Unknown error')}")
-    
-    elif args.verify:
-        print(f"Verifying Allora proof for job: {args.verify}")
-        
-        # Load the proof file
-        try:
-            with open(f"job_{args.verify}_allora_proofs.json", "r") as f:
-                proofs = json.load(f)
-                
-            # Verify requirements proof
-            req_verify_result = agent.execute_action("verify-allora-proof", proof=proofs["requirements_proof"])
-            if req_verify_result["success"] and req_verify_result["verified"]:
-                print("✅ Job requirements analysis proof verified")
-            else:
-                print("❌ Job requirements analysis proof verification failed")
-                
-            # Verify match proofs
-            for i, match_proof in enumerate(proofs["match_proofs"]):
-                match_verify_result = agent.execute_action("verify-allora-proof", proof=match_proof)
-                if match_verify_result["success"] and match_verify_result["verified"]:
-                    print(f"✅ Match proof {i+1} verified")
-                else:
-                    print(f"❌ Match proof {i+1} verification failed")
-                    
-            print("\nVerification complete!")
-        except FileNotFoundError:
-            print(f"Error: Proof file job_{args.verify}_allora_proofs.json not found")
-        except Exception as e:
-            print(f"Error verifying proofs: {str(e)}")
-    
-    else:
-        parser.print_help()
 
 if __name__ == "__main__":
     main()
