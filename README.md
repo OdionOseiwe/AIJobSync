@@ -1,3 +1,2 @@
-# AIjobsync marketpl
+# AIjobsync marketplace
 
-# AI

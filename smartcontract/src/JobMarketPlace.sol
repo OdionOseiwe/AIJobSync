@@ -18,13 +18,14 @@ contract JobMarketplace is ReentrancyGuard {
     }
 
     struct FreelancerProfile {
-        string name;
+        address freelancerAddr;
         string ipfsHash;  // Skill set is stored offchain IPFS
         bool exists;
     }
 
     IERC20 public MockUSDT;
     Escrow public escrowContract;
+    string[] public IPFShashes;
     
     mapping(bytes32 => Job) public jobs; // Unique job ID → Job details
     mapping(address => FreelancerProfile) public freelancerProfiles;
@@ -42,14 +43,15 @@ contract JobMarketplace is ReentrancyGuard {
     }
 
 
-    function registerFreelancer(string memory _name, string memory _ipfsHash) external {
+    function registerFreelancer(address _freelancerAddr, string memory _ipfsHash) external {
         require(!freelancerProfiles[msg.sender].exists, "Profile already exists");
     
         freelancerProfiles[msg.sender] = FreelancerProfile({
-            name: _name,
+            freelancerAddr: _freelancerAddr,
             ipfsHash: _ipfsHash,
             exists: true
         });
+        IPFShashes.push(_ipfsHash);
     }
 
     function generateJobId(string memory _title, address _employer) public view returns (bytes32) {

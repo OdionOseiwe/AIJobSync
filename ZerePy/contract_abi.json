@@ -1,0 +1,429 @@
+[
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_MockUSDT",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "_escrow",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "inputs": [],
+        "name": "ReentrancyGuardReentrantCall",
+        "type": "error"
+    },
+    {
+        "anonymous": False,
+        "inputs": [
+            {
+                "indexed": True,
+                "internalType": "bytes32",
+                "name": "jobId",
+                "type": "bytes32"
+            },
+            {
+                "indexed": False,
+                "internalType": "address",
+                "name": "freelancer",
+                "type": "address"
+            }
+        ],
+        "name": "JobApplied",
+        "type": "event"
+    },
+    {
+        "anonymous": False,
+        "inputs": [
+            {
+                "indexed": True,
+                "internalType": "bytes32",
+                "name": "jobId",
+                "type": "bytes32"
+            },
+            {
+                "indexed": False,
+                "internalType": "address",
+                "name": "freelancer",
+                "type": "address"
+            }
+        ],
+        "name": "JobAssigned",
+        "type": "event"
+    },
+    {
+        "anonymous": False,
+        "inputs": [
+            {
+                "indexed": True,
+                "internalType": "bytes32",
+                "name": "jobId",
+                "type": "bytes32"
+            },
+            {
+                "indexed": False,
+                "internalType": "address",
+                "name": "freelancer",
+                "type": "address"
+            },
+            {
+                "indexed": False,
+                "internalType": "uint256",
+                "name": "payout",
+                "type": "uint256"
+            }
+        ],
+        "name": "JobCompleted",
+        "type": "event"
+    },
+    {
+        "anonymous": False,
+        "inputs": [
+            {
+                "indexed": True,
+                "internalType": "bytes32",
+                "name": "jobId",
+                "type": "bytes32"
+            },
+            {
+                "indexed": False,
+                "internalType": "string",
+                "name": "title",
+                "type": "string"
+            },
+            {
+                "indexed": False,
+                "internalType": "address",
+                "name": "employer",
+                "type": "address"
+            },
+            {
+                "indexed": False,
+                "internalType": "uint256",
+                "name": "budget",
+                "type": "uint256"
+            }
+        ],
+        "name": "JobCreated",
+        "type": "event"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "IPFShashes",
+        "outputs": [
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "MockUSDT",
+        "outputs": [
+            {
+                "internalType": "contract IERC20",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "jobId",
+                "type": "bytes32"
+            }
+        ],
+        "name": "applyForJob",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "jobId",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "address",
+                "name": "freelancer",
+                "type": "address"
+            }
+        ],
+        "name": "autoAssignJob",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "jobId",
+                "type": "bytes32"
+            }
+        ],
+        "name": "cancelJob",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "jobId",
+                "type": "bytes32"
+            }
+        ],
+        "name": "completeJob",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "_title",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "_description",
+                "type": "string"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_budget",
+                "type": "uint256"
+            }
+        ],
+        "name": "createJob",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "escrowContract",
+        "outputs": [
+            {
+                "internalType": "contract Escrow",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "freelancerProfiles",
+        "outputs": [
+            {
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "ipfsHash",
+                "type": "string"
+            },
+            {
+                "internalType": "bool",
+                "name": "exists",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "_title",
+                "type": "string"
+            },
+            {
+                "internalType": "address",
+                "name": "_employer",
+                "type": "address"
+            }
+        ],
+        "name": "generateJobId",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "jobApplications",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "jobRecommendations",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "name": "jobs",
+        "outputs": [
+            {
+                "internalType": "string",
+                "name": "title",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "description",
+                "type": "string"
+            },
+            {
+                "internalType": "uint256",
+                "name": "budget",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "employer",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "freelancer",
+                "type": "address"
+            },
+            {
+                "internalType": "bool",
+                "name": "completed",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "_name",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "_ipfsHash",
+                "type": "string"
+            }
+        ],
+        "name": "registerFreelancer",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "jobId",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "address[]",
+                "name": "recommendedFreelancers",
+                "type": "address[]"
+            }
+        ],
+        "name": "storeAIRecommendations",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }
+]    
