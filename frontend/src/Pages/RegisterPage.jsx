@@ -1,6 +1,6 @@
 import React from 'react'
-import NavBar from '../components/NavBar';
-import CustomInput from '../Components/CustomInput';
+import NavBar from '../components/NavBar.jsx';
+import CustomInput from '../Components/CustomInput.jsx';
 function RegisterPage() {
   return (
     <div>
