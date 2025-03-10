@@ -1,9 +1,9 @@
 import React from "react";
-import NavBar from "../components/NavBar";
+import NavBar from "../Components/NavBar";
 function FindJobs() {
   return (
     <div>
-      <NavBar />
+      <NavBar/>
       <div className="px-10 py-5">
         <div>
           <h1 className="text-3xl font-semibold">Find your dream job</h1>

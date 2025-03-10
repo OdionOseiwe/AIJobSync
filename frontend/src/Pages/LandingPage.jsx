@@ -1,6 +1,6 @@
 import React from "react";
-import Footer from "../components/Footer";
-import NavBar from "../components/NavBar";
+import Footer from "../Components/Footer";
+import NavBar from "../Components/NavBar";
 import { NavLink } from "react-router-dom";
 
 export default function Dashboard() {
