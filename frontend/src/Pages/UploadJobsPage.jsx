@@ -1,8 +1,8 @@
 import React from "react";
 import { useState } from "react";
 import { PlusCircle, Dot } from "lucide-react";
-import CustomInput from "../components/CustomInput";
-import NavBar from "../components/NavBar";
+import CustomInput from "../components/CustomInput.jsx";
+import NavBar from "../components/NavBar.jsx";
 
 function UploadJobsPage() {
   const [activeDescription, setActiveDescription] = useState();
