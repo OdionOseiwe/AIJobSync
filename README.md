@@ -2,29 +2,31 @@
 
 The AIJobSync documentation outlines a decentralized job marketplace that leverages AI-powered job recommendations and blockchain-based payments to create a seamless, transparent, and efficient hiring ecosystem. The platform integrates Allora AI to match freelancers with jobs based on their off-chain skill profiles stored on IPFS (InterPlanetary File System), ensuring faster and more accurate job placements. By combining AI and blockchain, AIJobSync addresses key pain points in traditional job platforms, such as inefficiency, lack of transparency, and payment disputes.
 
+![alt text](<Screenshot 2025-03-14 at 13.32.01.png>)
+
 ## Key Features:
 <bold> 1. AI-Driven Job Matching: </bold>
 
-    - Employers can effortlessly find top freelancers through AI-powered recommendations.
+    * Employers can effortlessly find top freelancers through AI-powered recommendations.
 
  
 
-    - Freelancers receive highly relevant job matches, reducing application fatigue and improving efficiency.
+    * Freelancers receive highly relevant job matches, reducing application fatigue and improving efficiency.
 
-<bold> Decentralized Skill Profiles: </bold>
+<bold>2. Decentralized Skill Profiles: </bold>
 
-    - Freelancer skill profiles are stored on IPFS, ensuring secure, off-chain storage while maintaining accessibility and integrity.
+    * Freelancer skill profiles are stored on IPFS, ensuring secure, off-chain storage while maintaining accessibility and integrity.
 
-<bold> Trustless Payments:</bold>
+<bold>3. Trustless Payments:</bold>
 
 
-    - Payments are handled through smart contracts and escrow mechanisms, ensuring fairness and security.
+    * Payments are handled through smart contracts and escrow mechanisms, ensuring fairness and security.
 
-    - Blockchain-based escrow eliminates payment disputes and delays, fostering trust between employers and freelancers.
+    * Blockchain-based escrow eliminates payment disputes and delays, fostering trust between employers and freelancers.
 
-<bold>Transparency and Cost Efficiency: </bold>
+<bold>4. Transparency and Cost Efficiency: </bold>
 
-    - Decentralization removes the need for intermediaries, ensuring transparency and eliminating platform fees.
+    * Decentralization removes the need for intermediaries, ensuring transparency and eliminating platform fees.
 
 
 
