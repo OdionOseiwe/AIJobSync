@@ -5,7 +5,7 @@ The AIJobSync documentation outlines a decentralized job marketplace that levera
 ![alt text](<Screenshot 2025-03-14 at 13.32.01.png>)
 
 ## Key Features:
-<bold> 1. AI-Driven Job Matching: </bold>
+* AI-Driven Job Matching: 
 
     * Employers can effortlessly find top freelancers through AI-powered recommendations.
 
@@ -13,18 +13,18 @@ The AIJobSync documentation outlines a decentralized job marketplace that levera
 
     * Freelancers receive highly relevant job matches, reducing application fatigue and improving efficiency.
 
-<bold>2. Decentralized Skill Profiles: </bold>
+* Decentralized Skill Profiles:
 
     * Freelancer skill profiles are stored on IPFS, ensuring secure, off-chain storage while maintaining accessibility and integrity.
 
-<bold>3. Trustless Payments:</bold>
+* Trustless Payments:
 
 
     * Payments are handled through smart contracts and escrow mechanisms, ensuring fairness and security.
 
     * Blockchain-based escrow eliminates payment disputes and delays, fostering trust between employers and freelancers.
 
-<bold>4. Transparency and Cost Efficiency: </bold>
+* Transparency and Cost Efficiency: 
 
     * Decentralization removes the need for intermediaries, ensuring transparency and eliminating platform fees.
 
